@@ -1,3 +1,4 @@
+// const env = require('dotenv');
 /**
  * ProyectosController
  *
@@ -11,18 +12,22 @@ module.exports = {
     try {
       const {
         nombre,
-        fecha,
+        periodo,
         asesor,
         autores,
         url,
         tags,
         description,
         createTags,
+        doc,
         carreras
       } = req.allParams();
 
       sails.log(req.allParams());
-      return res.ok();
+      // sails.log(env);
+      sails.log(process.env)
+      // sails.log(files)
+      // return res.ok();
 
       sails.log('Validadores');
       let errorString = 'Missing fields:';
@@ -36,10 +41,7 @@ module.exports = {
         errorString = `${errorString} description`;
         reqErr = true;
       }
-      if(!fecha || fecha === ''){
-        errorString = `${errorString} fecha`;
-        reqErr = true;
-      }
+      
       if(!asesor || asesor < 1){
         errorString = `${errorString} asesor`;
         reqErr = true;
@@ -48,10 +50,10 @@ module.exports = {
         errorString = `${errorString} autores`;
         reqErr = true;
       }
-      if(!url || url === ''){
-        errorString = `${errorString} url`;
-        reqErr = true;
-      }
+      // if(!url || url === ''){
+      //   errorString = `${errorString} url`;
+      //   reqErr = true;
+      // }
       /* if(!tags || tags.length === 0){
         errorString = `${errorString} tags`;
         reqErr = true;
@@ -90,13 +92,23 @@ module.exports = {
       const rawTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
       const finalTags = [...rawTags, ...newTagsId]; */
 
+      const helperResult = await sails.helpers.uploadFile.with({ req, sls: sails });
+
+
+      // sails.log('Pasa el upload');
+      sails.log(helperResult);
+      
+      const uploadedFile = helperResult.files[0]
+      sails.log(uploadedFile);
+      // return res.ok();
+
       sails.log('Crea el proyecto')
       const { id } = await Proyectos.create({
         nombre,
-        fecha,
+        periodo,
         asesor,
         description,
-        url,
+        url: uploadedFile.extra.Location,
         status: 1
       }).fetch();
 
@@ -109,17 +121,17 @@ module.exports = {
       await Proyectos.addToCollection(id, 'autores')
       .members(rawAutores);
 
-      // sails.log('Agrega carreras')
-      // const rawCarrers = typeof carreras === 'string' ? JSON.parse(carreras) : carreras;
-      // await Proyectos.addToCollection(id, 'carreras')
-      // .members(rawCarrers);
+      sails.log('Agrega carreras')
+      const rawCarrers = typeof carreras === 'string' ? JSON.parse(carreras) : carreras;
+      await Proyectos.addToCollection(id, 'carreras')
+      .members(rawCarrers);
 
       sails.log('Obtiene el proyecto creado')
       const proyecto =  await Proyectos.findOne({ id })
-        // .populate('keywords')
+        .populate('periodo')
         .populate('autores')
         .populate('asesor')
-        // .populate('carreras');
+        .populate('carreras');
 
       res.created({ proyecto });
 
@@ -216,8 +228,8 @@ module.exports = {
         .populate('asesor')
         .populate('status')
         .populate('carreras')
-        .populate('keywords');;
-      res.success(project);
+        .populate('periodo');;
+      res.success({ project });
     } catch (err) {
       res.handle(err);
     }
@@ -225,69 +237,74 @@ module.exports = {
   async get(req, res) {
     try {
       const {
-        nombre,
-        fecha,
-        asesor,
-        description,
-        tags,
-        autores,
-        carreras
+        search = '',
+        periodo = 0,
+        carrera = 0,
       } = req.allParams();
 
-      let params = {};
-      const len = 0;
-
-      if(nombre){
-        params.nombre = {
-          like: `%${nombre}%`
-        };
+      const params = {
+        sort: 'createdAt DESC'
       }
 
-      if(fecha){
-        params.fecha = fecha;
+      const arr = [];
+
+      if(search !== ''){
+        arr.push({
+          nombre: { contains: search }
+        });
       }
 
-      if(asesor){
-        params.asesor = asesor;
+      if(periodo !== 0){
+        arr.push({ periodo });
       }
 
-      if(description){
-        params.description = {
-            like: `%${description}%`
-        };
+      if(arr.length > 1){
+        const whereClauses = {}
+        arr.map(item => {
+          const [key] = Object.keys(item);
+          whereClauses[key] = item[key];
+        })
+        params.where = { ...whereClauses };
+      }else if(arr.length === 1){
+        params.where = { ...arr[0] };
       }
 
-      sails.log('Llega a tags')
-      if(tags){
-        params.keywords = {
-          contains: typeof tags === 'string' ? JSON.parse(tags) : tags 
-        };
-      }
-      sails.log('Sale de tags')
-
-      if(carreras){
-        params.carreras = {
-          'in': carreras
-        };
-      }
-
-      if(autores){
-        params.autores = {
-          'in': autores 
-        };
-      }
-
+      // let projects = [];
       const projects = await Proyectos.find(params)
         .populate('autores')
         .populate('asesor')
         .populate('status')
         .populate('carreras')
-        .populate('keywords');
+        .populate('periodo');
 
-      res.success(projects);
+      const finalProjects = carrera === 0 ? [...projects] : projects.filter(item => {
+        console.log(item);
+        return item.carreras.findIndex(car => car.id == carrera) > -1;
+      })
+
+      res.success({ projects: finalProjects });
 
     } catch (err) {
+      console.log(err)
       res.handle(err)
     }
+  },
+  async prueba(req, res){
+    req.file('doc')
+    .upload({
+      adapter: require('skipper-s3'),
+      key: process.env.KEY,
+      secret: process.env.SECRET,
+      bucket: process.env.BUCKET,
+      region: process.env.REGION
+    }, function whenDone(err, uploadedFiles) {
+      if (err) {
+        return res.serverError(err);
+      }
+      return res.ok({
+        files: uploadedFiles,
+        textParams: req.allParams()
+      });
+    })
   },
 };

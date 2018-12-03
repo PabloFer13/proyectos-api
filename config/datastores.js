@@ -49,7 +49,7 @@ module.exports.datastores = {
     *                                                                          *
     ***************************************************************************/
    adapter: 'sails-mysql',
-   url: 'mysql://sql9261214:xGUA8rNE1t@sql9.freemysqlhosting.net:3306/sql9261214',
+   url: 'mysql://sql9268215:XFJrgPBTlF@sql9.freemysqlhosting.net:3306/sql9268215',
 
   },
 

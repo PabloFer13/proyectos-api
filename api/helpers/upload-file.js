@@ -1,3 +1,4 @@
+const { KEY, SECRET, BUCKET, REGION } = require('dotenv');
 module.exports = {
 
 
@@ -12,38 +13,36 @@ module.exports = {
       type: 'ref',
       description: 'The current incoming request (req).',
       required: true
+    },
+    sls : {
+      type: 'ref',
+      description: 'Sails object'
     }
-  },
-
-
-  exits: {
-
   },
 
 
   fn: async function (inputs, exits) {
 
-    const { req } = inputs;
-    req.file('documentFile')
+    const { req, sls } = inputs;
+    sls.log('Llega');
+    sls.log(process.env.KEY);
+    sls.log(process.env.SECRET);
+    sls.log(process.env.BUCKET);
+    sls.log(process.env.REGION);
+    req.file('doc')
       .upload({
         adapter: require('skipper-s3'),
-        // key
-        // secret
-        // bucket
-        // region
-        // endpoint: 'telematicaucaribe.s3.us-east-2.amazonaws.com'
-        // Optional
-        // token: 'temporary_sts_creds'
+        key: process.env.KEY,
+        secret: process.env.SECRET,
+        bucket: process.env.BUCKET,
+        region: process.env.REGION
       }, function whenDone(err, uploadedFiles) {
         sails.log(uploadedFiles);
         if (err) {
-          return exits.success({ status: false, err });
+          sls.log(err)
+          exits.success({ status: false, err });
         }
-        return exits.success({ status: true, files: uploadedFiles });
-        // return res.ok({
-        //   files: uploadedFiles,
-        //   textParams: req.allParams()
-        // });
+        exits.success({ status: true, files: uploadedFiles });
       })
   }
 };

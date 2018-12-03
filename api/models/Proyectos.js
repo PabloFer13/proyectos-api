@@ -21,9 +21,6 @@ module.exports = {
     nombre: {
       type: 'string'
     },
-    fecha: {
-      type: 'string'
-    },
     asesor: {
       model: 'usuarios'
     },

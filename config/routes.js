@@ -47,6 +47,8 @@ module.exports.routes = {
  'post /login': 'AppController.login',
 
  'post /dates': 'PeriodosController.create',
- 'get /dates': 'PeriodosController.get'
+ 'get /dates': 'PeriodosController.get',
+
+ 'post /prueba': 'ProyectosController.prueba'
   
 };
