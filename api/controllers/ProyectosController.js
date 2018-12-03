@@ -21,6 +21,9 @@ module.exports = {
         carreras
       } = req.allParams();
 
+      sails.log(req.allParams());
+      return res.ok();
+
       sails.log('Validadores');
       let errorString = 'Missing fields:';
       let reqErr = false;

@@ -1,5 +1,5 @@
 /**
- * Proyectos.js
+ * Periodos.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -16,39 +16,24 @@ module.exports = {
       type: 'number',
       unique: true,
       autoIncrement: true,
-      columnName: 'id_usuario'
+      columnName: 'id_periodo'
     },
-    nombre: {
+    year: {
       type: 'string'
     },
-    fecha: {
+    'season': {
       type: 'string'
-    },
-    asesor: {
-      model: 'usuarios'
-    },
-    url: {
-      type: 'string'
-    },
-    description: {
-      type: 'string'
-    },
-    keywords: {
-      collection: 'tags',
-      via: 'projects'
-    },
-    autores: {
-      collection: 'usuarios'
-    },
-    carreras: {
-      collection: 'programaEducativo'
-    },
-    status: {
-      model: 'status'
-    },
-    periodo: {
-      model: 'periodos'
     }
+
+    //  ╔═╗╔╦╗╔╗ ╔═╗╔╦╗╔═╗
+    //  ║╣ ║║║╠╩╗║╣  ║║╚═╗
+    //  ╚═╝╩ ╩╚═╝╚═╝═╩╝╚═╝
+
+
+    //  ╔═╗╔═╗╔═╗╔═╗╔═╗╦╔═╗╔╦╗╦╔═╗╔╗╔╔═╗
+    //  ╠═╣╚═╗╚═╗║ ║║  ║╠═╣ ║ ║║ ║║║║╚═╗
+    //  ╩ ╩╚═╝╚═╝╚═╝╚═╝╩╩ ╩ ╩ ╩╚═╝╝╚╝╚═╝
+
   },
 
 };

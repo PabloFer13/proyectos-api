@@ -1,5 +1,6 @@
+const moment = require('moment');
 /**
- * StatusController
+ * PeriodosController
  *
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
@@ -9,20 +10,20 @@ module.exports = {
   async create(req, res){
     try {
       const {
-        nombre,
-        display,
+        year,
+        season,
       } = req.allParams();
 
       let errorString = 'Missing fields:';
       let reqErr = false;
       
-      if(!nombre || nombre === ''){
-        errorString = `${errorString} nombre`;
+      if(!year || year === '' || year < 2000){
+        errorString = `${errorString} year`;
         reqErr = true;
       }
 
-      if(!display || display === ''){
-        errorString = `${errorString} display`;
+      if(!season || season === ''){
+        errorString = `${errorString} season`;
         reqErr = true;
       }
       
@@ -37,21 +38,22 @@ module.exports = {
         throw err;
       }
 
-      const status = await Status.create({
-        nombre,
-        display,
+      const periodo = await Periodos.create({
+        year: `${year}`,
+        season,
       }).fetch()
 
-      res.created({ status });
+      res.created({ periodo });
 
     } catch (err) {
       res.handle(err);
     }
   },
   async get(req, res){
-    const status = await Status.find({});
+    const periodos = await Periodos.find({});
 
-    res.success({ status });
+    res.success({ periodos });
   }
+
 };
 

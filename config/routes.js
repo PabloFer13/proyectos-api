@@ -45,5 +45,8 @@ module.exports.routes = {
  'get /career/:id': 'ProgramaEducativoController.find',
 
  'post /login': 'AppController.login',
+
+ 'post /dates': 'PeriodosController.create',
+ 'get /dates': 'PeriodosController.get'
   
 };

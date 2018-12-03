@@ -127,36 +127,19 @@ module.exports = {
   async get(req, res) {
     try {
       const {
-        nombre,
-        display,
-        clave,
-        status
+        search = ''
       } = req.allParams();
 
       const params = [];
       const len = 0;
 
-      if(nombre){
-        len = params.push({ nombre });
-      }
-
-      if(display){
-        len = params.push({ display });
-      }
-
-      if(clave){
-        len = params.push({ clave });
-      }
-
-      if(status){
-        len = params.push({ status });
-      }
-
-      const carreras = await Academia.find(
-        len === 0
-        ? {}
-        : { or: params }
-      );
+      const carreras = await ProgramaEducativo.find({
+        or: [
+          { nombre: { contains: search } },
+          { display: { contains: search } },
+          { clave: { contains: search } },
+        ]
+      });
 
       res.success(carreras);
 
